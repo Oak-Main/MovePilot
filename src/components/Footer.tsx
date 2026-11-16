@@ -32,6 +32,8 @@ const COLUMNS: FooterColumn[] = [
       { label: 'We never sell your data', to: '/trust' },
       { label: 'FMCSA data source', to: '/trust' },
       { label: 'Legal', to: '/trust' },
+      { label: 'Privacy', to: '/privacy' },
+      { label: 'Terms', to: '/terms' },
     ],
   },
   {

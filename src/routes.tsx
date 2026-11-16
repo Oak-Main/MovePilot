@@ -9,6 +9,8 @@ import { Timeline } from '@/pages/Timeline';
 import { Move } from '@/pages/Move';
 import { Pricing } from '@/pages/Pricing';
 import { Trust } from '@/pages/Trust';
+import { Privacy } from '@/pages/Privacy';
+import { Terms } from '@/pages/Terms';
 import { Join } from '@/pages/Join';
 import { Login } from '@/pages/Login';
 import { Dashboard } from '@/pages/Dashboard';
@@ -47,6 +49,8 @@ export const routes: RouteDef[] = [
   { path: '/move/:slug', element: <Move />, theme: 'dark' },
   { path: '/pricing', element: <Pricing />, theme: 'dark' },
   { path: '/trust', element: <Trust />, theme: 'dark' },
+  { path: '/privacy', element: <Privacy />, theme: 'dark' },
+  { path: '/terms', element: <Terms />, theme: 'dark' },
 
   // Auth — full-bleed split screens, no global chrome.
   { path: '/join', element: <Join />, bare: true },
