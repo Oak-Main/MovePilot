@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 // test/legal-pages.test.js — /privacy and /terms exist everywhere a route has to be known.
 //
 // The site is a client-rendered SPA: Cloudflare Pages answers every path with the same
@@ -82,7 +84,7 @@ describe('legal facts (src/lib/legal.ts)', () => {
     expect(LEGAL.postalAddress).toBe(ADDRESS);
     expect(LEGAL.contactEmail).toBe(EMAIL);
     expect(LEGAL.governingLaw).toBe('California');
-    expect(LEGAL.effectiveDate).toBe('November 16, 2026');
+    expect(LEGAL.effectiveDate).toBe('November 17, 2026');
     expect(LEGAL.siteUrl).toBe('https://relocationstation.app');
   });
 });
@@ -130,7 +132,7 @@ describe.each([
   });
 
   it('states the effective date and the site it covers', () => {
-    expect(text).toContain('Effective November 16, 2026.');
+    expect(text).toContain('Effective November 17, 2026.');
     expect(text).toContain('MovePilot (https://relocationstation.app), operated by Oak and Main Developers LLC');
   });
 
@@ -162,7 +164,7 @@ describe('/privacy wording', () => {
       'When you visit, our hosting and security provider (Cloudflare) processes technical data such as your IP address, browser type and the pages you request, to deliver and protect the site.',
       'We use the following analytics tools to understand which pages are read:',
       'These tools may set cookies or similar identifiers and collect usage data such as pages viewed, approximate location derived from IP address, device type and referring site.',
-      'Some pages contain affiliate links. If you click one, the retailer or affiliate network may set its own cookie to record that the visit came from us. Their handling of that data is governed by their own privacy policies.',
+      'This site carries no affiliate links. If that changes, this policy will say so before any such link appears.',
       'We use this information to run, secure and improve the site and to understand which content is useful. We do not sell your personal information.',
       'Depending on where you live, including California under the CCPA as amended by the CPRA, you may have the right to know what personal information we hold about you, to ask us to delete or correct it, and to opt out of its sale or sharing. We do not sell personal information. To make a request, contact us at the address below; we will not discriminate against you for exercising these rights.',
       'This site is not directed to children under 13, and we do not knowingly collect personal information from them.',
@@ -179,7 +181,9 @@ describe('/privacy wording', () => {
 
   it('does not use the kit sentence that is false for a site with accounts', () => {
     expect(text).not.toContain('We do not ask you to create an account.');
-    expect(text).not.toContain('This site carries no affiliate links.');
+    // No partner link renders anywhere (2026-11-17: the only one, "Packing supplies", pointed
+    // at a placeholder domain and was removed), so the kit's no-affiliate variant applies.
+    expect(text).not.toContain('Some pages contain affiliate links.');
   });
 
   it('describes accounts, sessions and deletion as the code implements them', () => {
@@ -201,7 +205,7 @@ describe('/terms wording', () => {
     for (const sentence of [
       'By using the site you agree to them.',
       'Content on this site is provided for general information. It is not professional advice. Prices, availability and product details change, and you should confirm them with the seller before you buy.',
-      'Some links take you to other websites, and some are affiliate links. We are not responsible for the content, products or practices of other websites.',
+      'Some links take you to other websites. We are not responsible for the content, products or practices of other websites.',
       'You may read and share links to our pages for personal, non-commercial use. You may not copy substantial parts of the site, scrape it in a way that disrupts it, or use it unlawfully.',
       'The site is provided "as is" without warranties of any kind, to the fullest extent permitted by law.',
       'To the fullest extent permitted by law, Oak and Main Developers LLC is not liable for any indirect, incidental or consequential damages arising from your use of the site.',
@@ -281,5 +285,52 @@ describe('footer legal links', () => {
     }));
     const legal = links.filter((l) => /^(legal|privacy|terms)$/i.test(l.label));
     expect(legal.map((l) => l.href).sort()).toEqual(['/privacy', '/terms']);
+  });
+});
+
+describe('site claims match what the code does (2026-11-17)', () => {
+  // Owner's call, delegated in chat Tue Nov 17. Each claim below was false on the
+  // live site: no account deletion exists in the app, no payment processor is
+  // connected, and the only partner link pointed at a placeholder domain.
+  const PLACEHOLDER = /example-partner\.com|\.example\//;
+
+  it('/trust promises no one-click account deletion', () => {
+    const text = textOf(renderPath('/trust'));
+    expect(text).not.toMatch(/one click|one-click/i);
+    expect(text).toContain('The \u201cDelete my data\u201d control in Settings deletes your saved inventories and signs you out.');
+    expect(text).toContain(`To delete the account itself and everything saved under it, email ${EMAIL}.`);
+  });
+
+  it('/pricing says no payment is taken yet, and promises no one-click deletion', () => {
+    const text = textOf(renderPath('/pricing'));
+    expect(text).not.toMatch(/Pay once|one click|one-click/i);
+    expect(text).toContain('No payment is taken yet: the price shown is what the pass will cost once payments open.');
+  });
+
+  it('no rendered page links to a placeholder partner domain', () => {
+    for (const path of ['/', '/tools', '/trust', '/pricing', '/privacy', '/terms']) {
+      const html = renderPath(path);
+      expect(html, path).not.toMatch(PLACEHOLDER);
+      expect(html, path).not.toContain('/api/affiliate/go');
+    }
+  });
+
+  it('no page wires a partner link, so "This site carries no affiliate links" stays true', () => {
+    // The server render cannot reach links that appear only after client data loads
+    // (the old "Packing supplies" link sat in the loaded volume calculator), so the
+    // guard reads the page sources. A partner link comes back only together with a
+    // real program and the legal pages' affiliate wording.
+    const files = [];
+    const walk = (dir) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, e.name);
+        if (e.isDirectory()) walk(full);
+        else if (/\.(tsx|ts)$/.test(e.name)) files.push(full);
+      }
+    };
+    walk(join(process.cwd(), 'src', 'pages'));
+    walk(join(process.cwd(), 'src', 'components'));
+    const wired = files.filter((f) => /affiliate\.(goHref|click)\(/.test(readFileSync(f, 'utf8')));
+    expect(wired).toEqual([]);
   });
 });

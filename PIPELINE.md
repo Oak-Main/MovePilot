@@ -38,3 +38,8 @@ Core production deployment is complete. Optional third-party provider secrets
 (`NCOA_PROVIDER_KEY`, `FMCSA_WEBKEY`, and `SMS_PROVIDER_KEY`) can be added later
 to replace the documented deterministic/cache-only/no-op fallbacks. See
 **`DEPLOY.md`** for the resource inventory and redeploy commands.
+
+## Post-launch change: site claims (2026-11-17)
+
+Not a pipeline stage. On the owner's instruction, the live claims now match the code. `/trust` and `/pricing` no longer promise one-click deletion of everything; they say what the Settings control deletes and that account deletion is by email. `/pricing` says no payment is taken yet. The volume calculator's "Packing supplies" link pointed at a placeholder partner domain and is removed, so no page renders a partner link, and `/privacy` and `/terms` use the legal kit's no-affiliate wording, effective November 17, 2026. `npm test` is **113/113**: `test/legal-pages.test.js` adds three tests, one of which reads the page sources and fails if any page wires a partner link.
+

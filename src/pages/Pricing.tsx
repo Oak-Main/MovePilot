@@ -205,7 +205,7 @@ export function Pricing() {
               </div>
               <div className="flex flex-1 flex-col px-8 pb-8 pt-6">
                 <p className="text-body text-text-muted">
-                  Unlock the Relocation Vault for your move. Pay once, keep it for the whole project.
+                  Unlock the Relocation Vault for your move. No payment is taken yet: the price shown is what the pass will cost once payments open.
                 </p>
                 <ul className="mt-6 flex-1 space-y-3">
                   {PASS_FEATURES.map((f) => (
@@ -288,7 +288,7 @@ export function Pricing() {
             No account is ever required to use the free tools.
           </div>
           <p className="mt-3 text-body-sm text-text-faint">
-            We never sell your data or your leads. Delete everything with one click, anytime.
+            We never sell your data or your leads. Delete your saved inventories anytime in Settings.
           </p>
         </Reveal>
       </section>

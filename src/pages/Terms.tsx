@@ -12,7 +12,7 @@ import { LEGAL } from '@/lib/legal';
 /* ==========================================================================
    /terms — Terms of Use.
 
-   Wording source: the owner's legal kit v2 (terms template, affiliate variant),
+   Wording source: the owner's legal kit v2 (terms template, no-affiliate variant since 2026-11-17),
    used verbatim wherever it applies. The two sections marked NON-KIT (Accounts,
    Payments) are additions for a site with accounts. Each sentence in them
    states only what the code and the live site do today and is awaiting owner
@@ -34,10 +34,10 @@ export function Terms() {
         before you buy.
       </LegalText>
 
-      <LegalHeading>Affiliate links and third-party sites</LegalHeading>
+      <LegalHeading>Third-party sites</LegalHeading>
       <LegalText>
-        Some links take you to other websites, and some are affiliate links. We are not responsible
-        for the content, products or practices of other websites.
+        Some links take you to other websites. We are not responsible for the content, products or
+        practices of other websites.
       </LegalText>
 
       {/* NON-KIT section */}
