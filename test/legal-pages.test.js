@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 // test/legal-pages.test.js — /privacy and /terms exist everywhere a route has to be known.
 //
 // The site is a client-rendered SPA: Cloudflare Pages answers every path with the same
@@ -14,7 +12,8 @@ import { join } from 'node:path';
 //   (4) the sitemap lists it, and the footer links to it.
 // No network is touched: the edge Worker's upstream fetch is mocked.
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
