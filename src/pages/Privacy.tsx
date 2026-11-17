@@ -11,8 +11,8 @@ import { LEGAL } from '@/lib/legal';
 /* ==========================================================================
    /privacy — Privacy Policy.
 
-   Wording source: the owner's legal kit v2 (privacy template, affiliate
-   variant), used verbatim wherever it applies. Paragraphs marked NON-KIT are
+   Wording source: the owner's legal kit v2 (privacy template, no-affiliate
+   variant since 2026-11-17), used verbatim wherever it applies. Paragraphs marked NON-KIT are
    additions for a site with accounts. Each one states only what the code and
    the live site do today (see the pull request that added this page for the
    evidence) and is awaiting owner review. If the behaviour changes — a payment
@@ -95,9 +95,8 @@ export function Privacy() {
 
       <LegalHeading>Affiliate links</LegalHeading>
       <LegalText>
-        Some pages contain affiliate links. If you click one, the retailer or affiliate network may
-        set its own cookie to record that the visit came from us. Their handling of that data is
-        governed by their own privacy policies.
+        This site carries no affiliate links. If that changes, this policy will say so before any
+        such link appears.
       </LegalText>
       {/* NON-KIT */}
       <LegalText>

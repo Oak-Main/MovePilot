@@ -73,6 +73,7 @@ The market is saturated with lead brokers, affiliate farms, and closed-ecosystem
 **Phase 1 — Ads + contextual affiliates (launch)**
 - **Programmatic display ads** — non-intrusive placements on high-traffic city-pair route pages (modeled RPM $8 → $22 as authority grows).
 - **Affiliate / partner integrations** — HireAHelper API for booked loading/unloading labor; packaging-supplier links inside the box calculator; utility-transfer/setup partners (e.g., Citizen Home Solutions) earning commission when users transition utilities through the timeline dashboard.
+  *Status 2026-11-17: no partner program is live. The partner registry in `functions/lib/affiliates.js` still holds placeholder bases, so no page renders a partner link, and the legal pages use the kit's no-affiliate wording. A partner link returns only with a real program, the affiliate wording in `/privacy` and `/terms`, and an update to the guard test in `test/legal-pages.test.js`.*
 
 **Phase 2 — Premium Project Pass** — one-time **$19.99–$29.99** unlock (no recurring subscription — aligned with the infrequency of moving). **Gating:** the Relocation Vault, quote-normalization anomaly detection, multi-scenario modeling, and SMS alerts are locked behind the pass; all Free MVP and Registered-Free features remain fully open.
 

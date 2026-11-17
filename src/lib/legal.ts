@@ -11,7 +11,7 @@ export const LEGAL = {
   postalAddress: '1223 Cleveland Ave, Suite 200, San Diego, CA 92103',
   contactEmail: 'admin@oakandmain.dev',
   governingLaw: 'California',
-  effectiveDate: 'November 16, 2026',
+  effectiveDate: 'November 17, 2026',
   /** Analytics tools observed on the live site (Cloudflare RUM beacon + Zaraz config). */
   analytics: ['Cloudflare Web Analytics (Cloudflare, Inc.)', 'Google Analytics 4 (Google LLC)'],
 } as const;

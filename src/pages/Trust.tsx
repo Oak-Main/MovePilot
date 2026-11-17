@@ -38,7 +38,7 @@ const PROMISES = [
   {
     icon: <Lock />,
     title: 'Escrowed identity',
-    body: 'You can use every calculator and carrier check without giving us a name, an email, or a phone number. There is nothing to escrow because we ask for nothing. If you save your work, it stays yours — encrypted and deletable in one click.',
+    body: 'You can use every calculator and carrier check without giving us a name, an email, or a phone number. There is nothing to escrow because we ask for nothing. If you save your work, it stays yours: you can delete saved inventories and quotes in the app, and we delete your account and everything under it when you ask.',
   },
   {
     icon: <Split />,
@@ -165,12 +165,12 @@ export function Trust() {
                   </Badge>
                 </div>
                 <h2 className="mt-4 font-display text-h3 font-medium text-text">
-                  Delete everything, anytime — in one click.
+                  Your saved work, deleted when you say.
                 </h2>
                 <p className="mt-3 text-body text-text-muted">
-                  If you save a free account, your settings include a prominent
-                  &ldquo;Delete my data&rdquo; control that wipes your inventory, timeline, and
-                  account for good. No retention games, no dark patterns.
+                  The &ldquo;Delete my data&rdquo; control in Settings deletes your saved
+                  inventories and signs you out. To delete the account itself and everything saved
+                  under it, email admin@oakandmain.dev. No retention games, no dark patterns.
                 </p>
               </div>
               <div className="flex shrink-0 flex-col gap-3">
@@ -179,7 +179,7 @@ export function Trust() {
                 </Button>
                 <span className="inline-flex items-center gap-2 text-body-sm text-text-faint">
                   <Trash2 size={16} aria-hidden="true" />
-                  One-click deletion in settings
+                  Delete inventories in Settings
                 </span>
               </div>
             </div>

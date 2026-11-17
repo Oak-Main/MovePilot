@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Boxes, Plus, Minus, Search, Save, Package, Check, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Boxes, Plus, Minus, Search, Save, Check, AlertTriangle } from 'lucide-react';
 import {
   api,
   ApiError,
@@ -363,20 +363,6 @@ export function Volume() {
                 </div>
               </section>
 
-              {/* Packaging affiliate CTA (Section 6) */}
-              <aside className="flex items-center justify-between gap-3 rounded-md border border-[color:var(--border)] bg-surface-sunk px-4 py-3">
-                <div className="flex items-center gap-2 text-body-sm text-text-muted">
-                  <Package size={18} aria-hidden="true" className="text-text-faint" />
-                  Need boxes and tape?
-                </div>
-                <a
-                  href={api.affiliate.goHref('packaging', 'volume')}
-                  className="inline-flex items-center gap-1 text-body-sm font-semibold text-accent-ink underline-offset-4 hover:underline dark:text-accent"
-                >
-                  Packing supplies
-                  <ArrowRight size={14} aria-hidden="true" />
-                </a>
-              </aside>
             </div>
           )}
         </Card>
