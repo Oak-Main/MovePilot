@@ -80,6 +80,16 @@ const ROUTE_META = {
     description:
       "Where MovePilot's moving math and carrier records come from, how they are verified, and what the tool will never do with your data.",
   },
+  "/privacy": {
+    title: "Privacy Policy | MovePilot",
+    description:
+      "What MovePilot, operated by Oak and Main Developers LLC, collects when you visit or create an account, and what you can do about it.",
+  },
+  "/terms": {
+    title: "Terms of Use | MovePilot",
+    description:
+      "The terms that govern your use of MovePilot, operated by Oak and Main Developers LLC.",
+  },
 };
 
 function metaFor(url) {

@@ -24,6 +24,14 @@
 - **Zero mock data**: all data flows through `src/lib/api.ts`; the anonymous hero/estimator calls `POST /api/calc/estimate` (never any `/api/vault/*`); "sample data" appears only inside labeled 402 premium-gate previews.
 - Backend intact: 33 endpoint route files (full documented API surface — several serve multiple HTTP methods), 17 shared libs, the companion Worker (queue consumer + cron), migrations + seed.
 
+## Post-launch change: legal pages (2026-11-16)
+
+Not a pipeline stage. `/privacy` and `/terms` were added on the owner's instruction
+(`src/pages/Privacy.tsx`, `src/pages/Terms.tsx`, facts in `src/lib/legal.ts`), with
+footer links, sitemap entries and per-route meta in the edge Worker. `npm test` is now
+**108/108** across 15 files (`test/legal-pages.test.js` adds 24); `npm run typecheck`
+and `npm run build` exit 0. See the "Legal pages" section of `README.md`.
+
 ## Post-launch integrations
 
 Core production deployment is complete. Optional third-party provider secrets

@@ -176,6 +176,27 @@ The upstream `movepilot.pages.dev` deployment includes the Vite frontend and
 Pages Functions. Production D1, KV, and Queue bindings power the documented API;
 the separate companion Worker owns the Queue consumer and cron schedules.
 
+## Legal pages
+
+`/privacy` and `/terms` are client-rendered routes like every other page
+(`src/pages/Privacy.tsx`, `src/pages/Terms.tsx`, registered in `src/routes.tsx`, linked
+from the footer's Trust column, listed in `public/sitemap.xml`). They share one shell,
+`src/components/legal/LegalPage.tsx`, and one set of facts, `src/lib/legal.ts` (operating
+entity, postal address, contact email, governing law, effective date).
+
+- The wording is the owner's legal kit v2, verbatim where it applies. Paragraphs marked
+  `NON-KIT` in the two page files are additions for a site with accounts; each states
+  only what the code and the live site did on the effective date. When that behaviour
+  changes (a payment processor, an email or SMS provider, account deletion in the app, a
+  new analytics tool), change the matching sentence and move `effectiveDate`.
+- The per-route `<title>` and description live in the edge Worker
+  (`cloudflare/src/worker.js`, `ROUTE_META`). That Worker is deployed by hand
+  (`npx wrangler deploy --config cloudflare/wrangler.jsonc`); the pages themselves ship
+  with the Pages build.
+- `test/legal-pages.test.js` renders both routes through the real route table and fails
+  if either falls through to the 404 view or loses the entity, address, email or
+  governing law.
+
 ## Local dev & deploy quickstart
 
 ```bash
