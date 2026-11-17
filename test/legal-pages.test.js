@@ -273,9 +273,11 @@ describe('footer legal links', () => {
     const html = renderPath('/');
     const footer = html.match(/<footer[\s\S]*<\/footer>/)?.[0] ?? '';
     expect(footer).not.toBe('');
-    const links = [...footer.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => ({
+    // Footer links are plain text, so the label is read as the text between
+    // the tags; no tag stripping (and no sanitizer) is involved.
+    const links = [...footer.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>/g)].map((m) => ({
       href: m[1],
-      label: m[2].replace(/<[^>]+>/g, '').trim(),
+      label: m[2].trim(),
     }));
     const legal = links.filter((l) => /^(legal|privacy|terms)$/i.test(l.label));
     expect(legal.map((l) => l.href).sort()).toEqual(['/privacy', '/terms']);
