@@ -29,7 +29,7 @@
 Not a pipeline stage. `/privacy` and `/terms` were added on the owner's instruction
 (`src/pages/Privacy.tsx`, `src/pages/Terms.tsx`, facts in `src/lib/legal.ts`), with
 footer links, sitemap entries and per-route meta in the edge Worker. `npm test` is now
-**108/108** across 15 files (`test/legal-pages.test.js` adds 24); `npm run typecheck`
+**109/109** across 15 files (`test/legal-pages.test.js` adds 25: the 25th, from the 2026-11-17 footer fix, requires every footer link labelled Legal, Privacy or Terms to open `/privacy` or `/terms`); `npm run typecheck`
 and `npm run build` exit 0. See the "Legal pages" section of `README.md`.
 
 ## Post-launch integrations
