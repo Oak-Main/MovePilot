@@ -7,7 +7,6 @@ import {
   PackageCheck,
   Radar,
   ShieldCheck,
-  BellRing,
 } from 'lucide-react';
 import { m } from 'framer-motion';
 import { Badge, Button, Card, Eyebrow } from '@/components/ui';
@@ -54,7 +53,6 @@ const PASS_FEATURES = [
   'Relocation Vault — quote normalization & anomaly flags',
   'Multi-scenario cost comparison (DIY / container / full-service)',
   'PDF quote drop-in extraction',
-  'SMS reminders on timeline tasks',
   'Priority carrier re-checks',
 ];
 
@@ -106,24 +104,6 @@ const GATED: GatedPreview[] = [
           </tr>
         </tbody>
       </table>
-    ),
-  },
-  {
-    icon: <BellRing />,
-    title: 'SMS timeline reminders',
-    sample: (
-      <div className="space-y-2 text-body-sm text-text-muted">
-        <div className="flex items-center justify-between">
-          <span>Confirm mover</span>
-          <Badge tone="accent" icon={<BellRing />}>
-            Scheduled
-          </Badge>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Transfer utilities</span>
-          <Badge tone="neutral">Sends in 12 days</Badge>
-        </div>
-      </div>
     ),
   },
 ];
