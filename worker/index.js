@@ -12,8 +12,9 @@
 //       (a) "0 8 * * 1"     weekly → enqueue the SAFER re-ingest batch onto the
 //                            MP_FMCSA_INGEST queue (producer) for every cached carrier.
 //       (b) "*/15 * * * *"  every 15 min → scan D1 `alerts` WHERE send_at <= now AND
-//                            status='scheduled', dispatch SMS (or mark sent as a no-op
-//                            when SMS_PROVIDER_KEY is unset), and update status.
+//                            status='scheduled', dispatch SMS and update status. When
+//                            SMS_PROVIDER_KEY is unset nothing is sent and the alert
+//                            stays 'scheduled' (it is never marked sent).
 //
 // Cloudflare Workers runtime ONLY — Web Crypto / global fetch / env bindings. No Node APIs.
 // All shared logic is imported from the plain-ESM functions/lib/* modules so the exact
@@ -217,19 +218,19 @@ export function buildAlertMessage(alert) {
 }
 
 /**
- * Dispatch one SMS. When SMS_PROVIDER_KEY is unset this is a persisted no-op that still
- * counts as "sent" (§2, §4.4) — the alert row is not lost, it is just not physically sent.
+ * Dispatch one SMS. When SMS_PROVIDER_KEY is unset nothing is sent and the result says
+ * so ({sent:false}); the caller leaves the alert 'scheduled' so it is not reported as sent.
  * When the key is set it POSTs to the provider and meters the `sms` usage row.
  * @param {object} env
  * @param {string} phone
  * @param {string} message
- * @returns {Promise<{sent:true,noop:boolean}>}
+ * @returns {Promise<{sent:boolean,noop:boolean}>}
  * @throws on provider transport / non-2xx (caller marks the alert 'failed')
  */
 export async function sendSms(env, phone, message) {
   if (!env || !env.SMS_PROVIDER_KEY) {
-    // No provider configured: no-op success (alert persists, marked 'sent').
-    return { sent: true, noop: true };
+    // No provider configured: nothing is sent.
+    return { sent: false, noop: true };
   }
   const res = await fetch('https://sms.example-provider.com/v1/messages', {
     method: 'POST',
@@ -247,10 +248,12 @@ export async function sendSms(env, phone, message) {
 /**
  * 15-minute cron: select alerts due for dispatch (send_at <= now AND status='scheduled'),
  * send each, and mark it 'sent' or 'failed'. Only 'scheduled' rows at/behind `nowIso` are
- * touched — future, already-sent, and cancelled rows are left untouched.
+ * touched — future, already-sent, and cancelled rows are left untouched. When no SMS
+ * provider is configured a due alert is held: no UPDATE, it stays 'scheduled' and is
+ * counted in `held`.
  * @param {object} env
  * @param {string} [nowIso=now()] injectable "now" for deterministic tests
- * @returns {Promise<{dispatched:number,sent:number,failed:number}>}
+ * @returns {Promise<{dispatched:number,sent:number,failed:number,held:number}>}
  */
 export async function dispatchDueAlerts(env, nowIso = now()) {
   const due = await all(
@@ -263,10 +266,16 @@ export async function dispatchDueAlerts(env, nowIso = now()) {
 
   let sent = 0;
   let failed = 0;
+  let held = 0;
   for (const alert of due) {
     let status;
     try {
-      await sendSms(env, alert.phone, buildAlertMessage(alert));
+      const result = await sendSms(env, alert.phone, buildAlertMessage(alert));
+      if (!result.sent) {
+        // No provider: nothing went out, so the row stays 'scheduled' (not marked sent).
+        held += 1;
+        continue;
+      }
       status = 'sent';
       sent += 1;
     } catch (e) {
@@ -275,7 +284,7 @@ export async function dispatchDueAlerts(env, nowIso = now()) {
     }
     await run(env, `UPDATE alerts SET status = ? WHERE id = ?`, status, alert.id);
   }
-  return { dispatched: due.length, sent, failed };
+  return { dispatched: due.length, sent, failed, held };
 }
 
 /**
