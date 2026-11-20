@@ -166,8 +166,8 @@ export function Alerts() {
   if (gate === 'premium')
     return (
       <PremiumGate
-        title="A text before every deadline that matters."
-        description="Schedule an SMS for any move task — confirm the mover, transfer utilities, return keys. We send it once, at the time you set. No app, no daily nagging."
+        title="Text reminders are coming, not live yet."
+        description="Text reminders are not switched on yet. When they are, you will be able to schedule one text for any move task: confirm the mover, transfer utilities, return keys."
         onUnlocked={() => setReload((n) => n + 1)}
         sample={<AlertList alerts={SAMPLE_ALERTS} />}
       />
@@ -182,8 +182,8 @@ export function Alerts() {
           SMS reminders
         </h1>
         <p className="max-w-prose text-body-lg text-text-muted">
-          Schedule a one-time text for any deadline in your move. We send it exactly when you ask —
-          and never share your number.
+          Text reminders are not switched on yet, so nothing saved here is sent. You can list your
+          deadlines now; we will say on this page when texts start, and we never share your number.
         </p>
       </header>
 
