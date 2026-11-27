@@ -5,7 +5,8 @@
 // D1 / KV / SMS (and a mocked global fetch for the FMCSA_WEBKEY path). No live internet
 // is touched (§9.4). Two behaviours are asserted:
 //   (a) a fmcsa_refresh message writes the parsed record to KV and updates ingest_log;
-//   (b) the 15-minute cron scan selects EXACTLY the due 'scheduled' alerts and marks them.
+//   (b) the 15-minute cron scan selects EXACTLY the due 'scheduled' alerts, sends them
+//       when a provider is configured, and otherwise holds them as 'scheduled'.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import worker, {
@@ -167,6 +168,10 @@ function saferResponse() {
     },
   };
 }
+
+beforeEach(() => {
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected fetch'));
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -364,7 +369,7 @@ describe('scheduled cron — SMS alert dispatch (§2, §4.4)', () => {
   it('keeps due alerts scheduled and never marks them sent when no SMS provider key is set', async () => {
     const MP_DB = mockD1({ alerts: alertRows() });
     const env = { MP_DB }; // no SMS_PROVIDER_KEY
-    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected fetch'));
 
     const result = await dispatchDueAlerts(env, NOW);
 
