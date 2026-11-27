@@ -4,7 +4,9 @@
 // until a days-away send_at; max delivery delay is 12h). The alert is persisted as an
 // `alerts` row with status='scheduled' and the future send_at; the companion Worker's
 // 15-minute cron scans `alerts WHERE send_at <= now AND status='scheduled'` and
-// dispatches due reminders (marking each sent/failed). This endpoint does NOT enqueue.
+// dispatches due reminders (marking each sent/failed) when a provider is configured.
+// Without a provider, due alerts stay scheduled and count as held; none is marked sent.
+// This endpoint does NOT enqueue.
 
 import { ok, HttpError } from '../../lib/respond.js';
 import { readJson } from '../../_middleware.js';

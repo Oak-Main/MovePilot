@@ -5,7 +5,8 @@
 // D1 / KV / SMS (and a mocked global fetch for the FMCSA_WEBKEY path). No live internet
 // is touched (§9.4). Two behaviours are asserted:
 //   (a) a fmcsa_refresh message writes the parsed record to KV and updates ingest_log;
-//   (b) the 15-minute cron scan selects EXACTLY the due 'scheduled' alerts and marks them.
+//   (b) the 15-minute cron scan selects EXACTLY the due 'scheduled' alerts, sends them
+//       when a provider is configured, and otherwise holds them as 'scheduled'.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import worker, {
@@ -167,6 +168,10 @@ function saferResponse() {
     },
   };
 }
+
+beforeEach(() => {
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected fetch'));
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -345,19 +350,44 @@ describe('scheduled cron — SMS alert dispatch (§2, §4.4)', () => {
     ];
   }
 
-  it('dispatches exactly the due scheduled alerts and marks them sent (SMS no-op)', async () => {
+  it('dispatches exactly the due scheduled alerts and marks them sent (provider set)', async () => {
     const MP_DB = mockD1({ alerts: alertRows() });
-    const env = { MP_DB }; // no SMS_PROVIDER_KEY → no-op sends, still 'sent'
+    const env = { MP_DB, SMS_PROVIDER_KEY: 'sk' };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
 
     const result = await dispatchDueAlerts(env, NOW);
 
-    expect(result).toEqual({ dispatched: 2, sent: 2, failed: 0 });
+    expect(result).toEqual({ dispatched: 2, sent: 2, failed: 0, held: 0 });
     const byId = Object.fromEntries(MP_DB._tables.alerts.map((a) => [a.id, a.status]));
     expect(byId['a-due']).toBe('sent');
     expect(byId['a-exactly-now']).toBe('sent'); // send_at == now is due (<=)
     expect(byId['a-future']).toBe('scheduled'); // untouched
     expect(byId['a-sent']).toBe('sent'); // untouched (already sent)
     expect(byId['a-cancelled']).toBe('cancelled'); // untouched
+  });
+
+  it('keeps due alerts scheduled and never marks them sent when no SMS provider key is set', async () => {
+    const MP_DB = mockD1({ alerts: alertRows() });
+    const env = { MP_DB }; // no SMS_PROVIDER_KEY
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('unexpected fetch'));
+
+    const result = await dispatchDueAlerts(env, NOW);
+
+    expect(result).toEqual({ dispatched: 2, sent: 0, failed: 0, held: 2 });
+    const byId = Object.fromEntries(MP_DB._tables.alerts.map((a) => [a.id, a.status]));
+    expect(byId['a-due']).toBe('scheduled');
+    expect(byId['a-exactly-now']).toBe('scheduled');
+    expect(byId['a-future']).toBe('scheduled');
+    expect(byId['a-sent']).toBe('sent');
+    expect(byId['a-cancelled']).toBe('cancelled');
+    expect(MP_DB._calls.some((c) => /UPDATE alerts/i.test(c.sql))).toBe(false);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(MP_DB._tables.api_usage.find((r) => r.provider === 'sms')).toBeUndefined();
+
+    // A later run with the provider configured still finds and sends them.
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const later = await dispatchDueAlerts({ ...env, SMS_PROVIDER_KEY: 'sk' }, NOW);
+    expect(later).toEqual({ dispatched: 2, sent: 2, failed: 0, held: 0 });
   });
 
   it('marks an alert failed when the SMS provider errors', async () => {
@@ -370,7 +400,7 @@ describe('scheduled cron — SMS alert dispatch (§2, §4.4)', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('nope', { status: 500 }));
 
     const result = await dispatchDueAlerts(env, NOW);
-    expect(result).toEqual({ dispatched: 1, sent: 0, failed: 1 });
+    expect(result).toEqual({ dispatched: 1, sent: 0, failed: 1, held: 0 });
     expect(MP_DB._tables.alerts[0].status).toBe('failed');
   });
 
@@ -386,14 +416,14 @@ describe('scheduled cron — SMS alert dispatch (§2, §4.4)', () => {
       .mockResolvedValue(new Response('{}', { status: 200 }));
 
     const result = await dispatchDueAlerts(env, NOW);
-    expect(result).toEqual({ dispatched: 1, sent: 1, failed: 0 });
+    expect(result).toEqual({ dispatched: 1, sent: 1, failed: 0, held: 0 });
     expect(fetchSpy).toHaveBeenCalledOnce();
     const smsUsage = MP_DB._tables.api_usage.find((r) => r.provider === 'sms');
     expect(smsUsage.calls).toBe(1);
   });
 
-  it('sendSms is a persisted no-op success when no provider key is set', async () => {
-    expect(await sendSms({}, '+1', 'hi')).toEqual({ sent: true, noop: true });
+  it('sendSms sends nothing and reports sent:false when no provider key is set', async () => {
+    expect(await sendSms({}, '+1', 'hi')).toEqual({ sent: false, noop: true });
   });
 
   it('buildAlertMessage composes the reminder text', () => {
